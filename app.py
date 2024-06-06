@@ -1,4 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, session, send_file, flash
+from flask_socketio import SocketIO, emit, join_room, leave_room
+from datetime import datetime
 from models import db, User, Message, PrivateMessage
 import io
 
@@ -8,6 +10,8 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = 'your_secret_key'
 
 db.init_app(app)
+
+socketio = SocketIO(app)
 
 with app.app_context():
     db.create_all()
@@ -79,11 +83,6 @@ def logout():
 
 @app.route('/send', methods=['POST'])
 def send_message():
-    """
-    Обработка отправки нового сообщения.
-    Принимает данные из формы и добавляет сообщение в базу данных.
-    Перенаправляет обратно на главную страницу.
-    """
     if 'username' not in session:
         return redirect(url_for('login'))
     username = session['username']
@@ -92,6 +91,7 @@ def send_message():
         new_message = Message(username=username, message=message)
         db.session.add(new_message)
         db.session.commit()
+        socketio.emit('new_message',  {'username': username, 'message': message, 'timestamp': new_message.timestamp.strftime('%Y-%m-%d %H:%M:%S')}, room='general')
     return redirect(url_for('general'))
 
 @app.route('/recent', methods=['GET', 'POST'])
@@ -176,11 +176,32 @@ def private_chat(user_id):
             new_message = PrivateMessage(sender_id=sender_id, receiver_id=user_id, message=message)
             db.session.add(new_message)
             db.session.commit()
+            socketio.emit('new_private_message', {
+                'sender_id': sender_id,
+                'receiver_id': user_id,
+                'message': message,
+                'timestamp': new_message.timestamp.strftime('%Y-%m-%d %H:%M:%S'),  # Преобразование datetime в строку
+                'sender_username': session['username']
+            }, room=f'user_{user_id}')
     messages = PrivateMessage.query.filter(
         ((PrivateMessage.sender_id == sender_id) & (PrivateMessage.receiver_id == user_id)) |
         ((PrivateMessage.sender_id == user_id) & (PrivateMessage.receiver_id == sender_id))
     ).order_by(PrivateMessage.timestamp.asc()).all()
     return render_template('chat.html', messages=messages, receiver=receiver)
+
+@socketio.on('join')
+def handle_join(data):
+    if data["user_id"] == 'general':
+        room = 'general'
+    else: room = f'user_{data["user_id"]}'
+    join_room(room)
+
+@socketio.on('leave')
+def handle_leave(data):
+    if data["user_id"] == 'general':
+        room = 'general'
+    else: room = f'user_{data["user_id"]}'
+    leave_room(room)
 
 @app.route('/download_chat/<int:user_id>')
 def download_chat(user_id):
@@ -209,4 +230,4 @@ def download_chat(user_id):
     return send_file(mem, mimetype='text/plain', download_name='chat.txt', as_attachment=True)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    socketio.run(app, debug=True)

@@ -5,9 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat with {{ receiver.username }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
+            const receiverId = document.getElementById('receiver-info').dataset.receiverId;
+            socket.emit('join', { user_id: receiverId });
+
+            socket.on('new_private_message', data => {
+                const messagesList = document.querySelector('.messages');
+                const newMessage = document.createElement('div');
+                newMessage.classList.add('message');
+                newMessage.innerHTML = `
+                    <strong>${data.sender_username}:</strong>
+                    <p>${data.message}</p>
+                    <small>${data.timestamp}</small>
+                `;
+                messagesList.appendChild(newMessage);
+            });
+
+            const messageForm = document.querySelector('form[action*="private_chat"]');
+            messageForm.addEventListener('submit', event => {
+                event.preventDefault();
+                const message = document.getElementById('message').value;
+                socket.emit('send_message', { message: message });
+                messageForm.reset();
+            });
+
+            window.addEventListener('beforeunload', () => {
+                socket.emit('leave', { user_id: receiverId });
+            });
+        });
+    </script>
 </head>
 <body>
-    <div class="container">
+    <div class="container" id="receiver-info" data-receiver-id="{{ receiver.id }}">
         <h1>Chat with {{ receiver.username }}</h1>
         <a href="{{ url_for('users') }}">Back to users</a>
         <form action="{{ url_for('private_chat', user_id=receiver.id) }}" method="POST">

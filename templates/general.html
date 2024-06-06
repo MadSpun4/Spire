@@ -5,6 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Spire</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
+            socket.emit('join', { user_id: 'general' });
+
+            socket.on('new_message', data => {
+                const messagesList = document.querySelector('.messages');
+                const newMessage = document.createElement('div');
+                newMessage.classList.add('message');
+                newMessage.innerHTML = `
+                    <strong>${data.username}:</strong>
+                    <p>${data.message}</p>
+                    <small>${data.timestamp}</small>
+                `;
+                messagesList.appendChild(newMessage);
+            });
+
+            const messageForm = document.getElementById('messageForm');
+            messageForm.addEventListener('submit', event => {
+                event.preventDefault();
+                const message = document.getElementById('messageInput').value;
+                socket.emit('send_message', { message: message });
+                messageForm.reset();
+            });
+
+            window.addEventListener('beforeunload', () => {
+                socket.emit('leave', { user_id: 'general' });
+            });
+        });
+    </script>
 </head>
 <body>
     <div class="container">

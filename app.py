@@ -91,7 +91,12 @@ def send_message():
         new_message = Message(username=username, message=message)
         db.session.add(new_message)
         db.session.commit()
-        socketio.emit('new_message',  {'username': username, 'message': message, 'timestamp': new_message.timestamp.strftime('%Y-%m-%d %H:%M:%S')}, room='general')
+        socketio.emit('new_message',  {
+            'username': username, 
+            'message': message, 
+            'timestamp': new_message.timestamp.strftime('%Y-%m-%d %H:%M:%S')
+            }, 
+            room='general')
     return redirect(url_for('general'))
 
 @app.route('/recent', methods=['GET', 'POST'])
@@ -182,7 +187,7 @@ def private_chat(user_id):
                 'message': message,
                 'timestamp': new_message.timestamp.strftime('%Y-%m-%d %H:%M:%S'),  # Преобразование datetime в строку
                 'sender_username': session['username']
-            }, room=f'user_{user_id}')
+            }, room=f'chat_{min(int(user_id), int(sender_id))}_{max(int(user_id), int(sender_id))}')
     messages = PrivateMessage.query.filter(
         ((PrivateMessage.sender_id == sender_id) & (PrivateMessage.receiver_id == user_id)) |
         ((PrivateMessage.sender_id == user_id) & (PrivateMessage.receiver_id == sender_id))
@@ -193,14 +198,17 @@ def private_chat(user_id):
 def handle_join(data):
     if data["user_id"] == 'general':
         room = 'general'
-    else: room = f'user_{data["user_id"]}'
+    else: 
+        room = f'chat_{min(int(data["user_id"]), int(session['user_id']))}_{max(int(data["user_id"]), int(session['user_id']))}'
+        # print(room)
     join_room(room)
 
 @socketio.on('leave')
 def handle_leave(data):
     if data["user_id"] == 'general':
         room = 'general'
-    else: room = f'user_{data["user_id"]}'
+    else: 
+        room = f'chat_{min(int(data["user_id"]), int(session['user_id']))}_{max(int(data["user_id"]), int(session['user_id']))}'
     leave_room(room)
 
 @app.route('/download_chat/<int:user_id>')

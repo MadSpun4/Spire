@@ -199,7 +199,7 @@ def handle_join(data):
     if data["user_id"] == 'general':
         room = 'general'
     else: 
-        room = f'chat_{min(int(data["user_id"]), int(session['user_id']))}_{max(int(data["user_id"]), int(session['user_id']))}'
+        room = f'chat_{min(int(data["user_id"]), int(session["user_id"]))}_{max(int(data["user_id"]), int(session["user_id"]))}'
         # print(room)
     join_room(room)
 
@@ -208,7 +208,7 @@ def handle_leave(data):
     if data["user_id"] == 'general':
         room = 'general'
     else: 
-        room = f'chat_{min(int(data["user_id"]), int(session['user_id']))}_{max(int(data["user_id"]), int(session['user_id']))}'
+        room = f'chat_{min(int(data["user_id"]), int(session["user_id"]))}_{max(int(data["user_id"]), int(session["user_id"]))}'
     leave_room(room)
 
 @app.route('/download_chat/<int:user_id>')

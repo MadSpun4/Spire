@@ -41,7 +41,16 @@
 <body>
     <div class="container" id="receiver-info" data-receiver-id="{{ receiver.id }}">
         <h1>Chat with {{ receiver.username }}</h1>
-        <a href="{{ url_for('users') }}">Back to users</a>
+        <p><a href="{{ url_for('users') }}">Back to users</a></p>
+        <div class="messages">
+            {% for msg in messages %}
+                <div class="message">
+                    <strong>{{ 'You' if msg.sender_id == session['user_id'] else receiver.username }}:</strong>
+                    <p>{{ msg.message }}</p>
+                    <small>{{ msg.timestamp }}</small>
+                </div>
+            {% endfor %}
+        </div>
         <form action="{{ url_for('private_chat', user_id=receiver.id) }}" method="POST">
             <div>
                 <label for="message">Message:</label>
@@ -52,15 +61,6 @@
         <form action="{{ url_for('download_chat', user_id=receiver.id) }}" method="GET">
             <button type="submit">Download Chat</button>
         </form>
-        <div class="messages">
-            {% for msg in messages %}
-                <div class="message">
-                    <strong>{{ 'You' if msg.sender_id == session['user_id'] else receiver.username }}:</strong>
-                    <p>{{ msg.message }}</p>
-                    <small>{{ msg.timestamp }}</small>
-                </div>
-            {% endfor %}
-        </div>
     </div>
 </body>
 </html>

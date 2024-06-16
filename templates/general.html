@@ -40,15 +40,7 @@
 <body>
     <div class="container">
         <h1>General Chat</h1>
-        <a href="{{ url_for('index') }}">Back</a>
-        <!-- Форма для отправки нового сообщения -->
-        <form action="{{ url_for('send_message') }}" method="POST">
-            <div>
-                <label for="message">Message:</label>
-                <textarea id="message" name="message" required></textarea>
-            </div>
-            <button type="submit">Send</button>
-        </form>
+        <p><a href="{{ url_for('index') }}">Back</a></p>
         <!-- Список сообщений -->
         <div class="messages">
             {% for msg in messages %}
@@ -59,6 +51,14 @@
                 </div>
             {% endfor %}
         </div>
+        <!-- Форма для отправки нового сообщения -->
+        <form action="{{ url_for('send_message') }}" method="POST">
+            <div>
+                <label for="message">Message:</label>
+                <textarea id="message" name="message" required></textarea>
+            </div>
+            <button type="submit">Send</button>
+        </form>
     </div>
 </body>
 </html>

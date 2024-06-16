@@ -10,10 +10,12 @@
     <div class="container">
         <h1>Spire</h1>
         <p>Welcome, {{ username }}!</p>
-        <a href="{{ url_for('logout') }}">Logout</a> | 
-        <a href="{{ url_for('recent') }}">Recent</a> |
-        <a href="{{ url_for('users') }}">Users</a> |
-        <a href="{{ url_for('general') }}">General Chat</a>
+        <div class="links_bar">
+            <a href="{{ url_for('logout') }}">Logout</a> 
+            <a href="{{ url_for('recent') }}">Recent</a>
+            <a href="{{ url_for('users') }}">Users</a>
+            <a href="{{ url_for('general') }}">General Chat</a>
+        </div>
     </div>
 </body>
 </html>

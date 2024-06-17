@@ -12,6 +12,11 @@
             const receiverId = document.getElementById('receiver-info').dataset.receiverId;
             socket.emit('join', { user_id: receiverId });
 
+            const messagesList = document.querySelector('.messages');
+            
+            // Прокрутка вниз при загрузке страницы
+            messagesList.scrollTop = messagesList.scrollHeight;
+
             socket.on('new_private_message', data => {
                 const messagesList = document.querySelector('.messages');
                 const newMessage = document.createElement('div');
@@ -22,6 +27,8 @@
                     <small>${data.timestamp}</small>
                 `;
                 messagesList.appendChild(newMessage);
+                // Прокрутка вниз при получении нового сообщения
+                messagesList.scrollTop = messagesList.scrollHeight;
             });
 
             const messageForm = document.querySelector('form[action*="private_chat"]');
@@ -30,6 +37,11 @@
                 const message = document.getElementById('message').value;
                 socket.emit('send_message', { message: message });
                 messageForm.reset();
+
+                // Прокрутка вниз после отправки сообщения
+                setTimeout(() => {
+                    messagesList.scrollTop = messagesList.scrollHeight;
+                }, 100);
             });
 
             window.addEventListener('beforeunload', () => {

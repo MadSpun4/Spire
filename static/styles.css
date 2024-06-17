@@ -152,6 +152,7 @@ p a:hover {
 .messages {
     flex: 1;
     overflow-y: auto;
+    height: 440px;
     padding: 10px;
     border: 1px solid #ddd;
     border-radius: 5px;

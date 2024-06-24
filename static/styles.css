@@ -158,8 +158,25 @@ p a:hover {
     border-radius: 5px;
     margin-bottom: 20px;
     background-color: #f9f9f9;
+    /*TONI*/
+    scrollbar-width: thin;
+    scrollbar-color: #7300ff #ddd;
+   
+      
 }
 
+body::-webkit-scrollbar {
+    width: 10px; /* Ширина всего элемента навигации */
+  }
+  
+  body::-webkit-scrollbar-track {
+    background: #fff; /* Цвет дорожки */
+  }
+  
+body::-webkit-scrollbar-thumb {
+    background-color: #7300ff; /* Цвет бегунка */
+    border-radius: 20px; /* Округление бегунка */
+  }
 .message {
     margin-bottom: 15px;
     padding: 10px;
@@ -167,6 +184,7 @@ p a:hover {
     background-color: #e9ecef;
     position: relative;
 }
+
 
 .message strong {
     display: block;
@@ -197,7 +215,7 @@ textarea {
 
 form[action*="download_chat"] button {
     background-color: #2fa572;
-    margin-top: -60px;
+    margin-top: -10%;/*TONI*/
 }
 
 form[action*="download_chat"] button:hover {
